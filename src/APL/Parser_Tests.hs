@@ -39,7 +39,11 @@ tests =
         [ parserTest "x+y" $ Add (Var "x") (Var "y"),
           parserTest "x-y" $ Sub (Var "x") (Var "y"),
           parserTest "x*y" $ Mul (Var "x") (Var "y"),
-          parserTest "x/y" $ Div (Var "x") (Var "y")
+          parserTest "x/y" $ Div (Var "x") (Var "y"),
+          --Added tests Task2
+          parserTest "x**y" $ Pow (Var "x") (Var "y"),
+          parserTest "x==y" $ Eql (Var "x") (Var "y")
+          --Added tests Task2
         ],
       testGroup
         "Operator priority"
@@ -47,7 +51,27 @@ tests =
           parserTest "x+y-z" $ Sub (Add (Var "x") (Var "y")) (Var "z"),
           parserTest "x+y*z" $ Add (Var "x") (Mul (Var "y") (Var "z")),
           parserTest "x*y*z" $ Mul (Mul (Var "x") (Var "y")) (Var "z"),
-          parserTest "x/y/z" $ Div (Div (Var "x") (Var "y")) (Var "z")
+          parserTest "x/y/z" $ Div (Div (Var "x") (Var "y")) (Var "z"),
+          --Added tests Task2
+          parserTest "x*y**z" $
+            Mul (Var "x") (Pow (Var "y") (Var "z")),
+          parserTest "x**y*z" $
+            Mul (Pow (Var "x") (Var "y")) (Var "z"),
+          parserTest "x**y**z" $
+            Pow (Var "x") (Pow (Var "y") (Var "z")),
+          parserTest "x+y**z" $
+            Add (Var "x") (Pow (Var "y") (Var "z")),
+          parserTest "x==y**z" $
+            Eql (Var "x") (Pow (Var "y") (Var "z")),
+          parserTest "x+y==y+x" $
+            Eql
+              (Add (Var "x") (Var "y"))
+              (Add (Var "y") (Var "x")),
+          parserTest "x==y==z" $
+            Eql
+              (Eql (Var "x") (Var "y"))
+              (Var "z")
+          --Added tests Task2
         ],
       testGroup
         "Conditional expressions"
