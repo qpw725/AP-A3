@@ -136,6 +136,26 @@ pLoop = do
   e3 <- pExp
   pure $ ForLoop (v1, e1) (v2, e2) e3
 
+pPrint :: Parser Exp
+pPrint = do
+  lKeyword "print"
+  s <- pString
+  e <- pAtom
+  pure $ Print s e
+
+pPut :: Parser Exp
+pPut = do
+  lKeyword "put"
+  v1 <- pAtom
+  v2 <- pAtom
+  pure $ KvPut v1 v2
+
+pGet :: Parser Exp
+pGet = do
+  lKeyword "get"
+  v <- pAtom
+  pure $ KvGet v
+
 pLExp :: Parser Exp
 pLExp =
   choice
@@ -143,18 +163,13 @@ pLExp =
       pTryCatch,
       pLet,
       pLoop,
+      pPrint,
+      pPut,
+      pGet,
       If
         <$> (lKeyword "if" *> pExp)
         <*> (lKeyword "then" *> pExp)
         <*> (lKeyword "else" *> pExp),
-      Print 
-        <$> (lKeyword "print" *> pString)
-        <*> (pAtom),
-      KvPut
-        <$> (lKeyword "put" *> pAtom)
-        <*> pAtom,
-      KvGet
-        <$> (lKeyword "get" *> pAtom),
       pFExp
     ]
 
