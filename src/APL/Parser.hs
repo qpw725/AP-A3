@@ -30,7 +30,14 @@ keywords =
     "then",
     "else",
     "true",
-    "false"
+    "false",
+    "try",
+    "catch",
+    "let",
+    "in",
+    "loop",
+    "for",
+    "do"
   ]
 
 lVName :: Parser VName
@@ -79,28 +86,83 @@ pFExp = pAtom >>= chain
           pure x
         ]
 
+pLambda :: Parser Exp
+pLambda = do
+  lString "\\"
+  v <- lVName
+  lString "->"
+  e <- pExp
+  pure $ Lambda v e
+
+pTryCatch :: Parser Exp
+pTryCatch = do
+  lKeyword "try"
+  e1 <- pExp
+  lKeyword "catch"
+  e2 <- pExp
+  pure $ TryCatch e1 e2
+
+pLet :: Parser Exp
+pLet = do
+  lKeyword "let"
+  v <- lVName
+  lString "="
+  e1 <- pExp
+  lKeyword "in"
+  e2 <- pExp
+  pure $ Let v e1 e2
+
+pLoop :: Parser Exp
+pLoop = do
+  lKeyword "loop"
+  v1 <- lVName
+  lString "="
+  e1 <- pExp
+  lKeyword "for"
+  v2 <- lVName
+  lString "<"
+  e2 <- pExp
+  lKeyword "do"
+  e3 <- pExp
+  pure $ ForLoop (v1, e1) (v2, e2) e3
+
 pLExp :: Parser Exp
 pLExp =
   choice
-    [ If
+    [ pLambda,
+      pTryCatch,
+      pLet,
+      pLoop,
+      If
         <$> (lKeyword "if" *> pExp)
         <*> (lKeyword "then" *> pExp)
         <*> (lKeyword "else" *> pExp),
       pFExp
     ]
 
+pExp2 :: Parser Exp
+pExp2 = do
+  x <- pLExp
+  choice
+    [ do
+        lString "**"
+        y <- pExp2
+        pure $ Pow x y,
+      pure x
+    ]
+
 pExp1 :: Parser Exp
-pExp1 = pLExp >>= chain
+pExp1 = pExp2 >>= chain
   where
     chain x =
       choice
         [ do
             lString "*"
-            y <- pLExp
+            y <- pExp2
             chain $ Mul x y,
           do
             lString "/"
-            y <- pLExp
+            y <- pExp2
             chain $ Div x y,
           pure x
         ]
@@ -122,7 +184,16 @@ pExp0 = pExp1 >>= chain
         ]
 
 pExp :: Parser Exp
-pExp = pExp0
+pExp = pExp0 >>= chain
+  where
+    chain x =
+      choice
+        [ do
+            lString "=="
+            y <- pExp0
+            chain $ Eql x y,
+          pure x
+        ]
 
 parseAPL :: FilePath -> String -> Either String Exp
 parseAPL fname s = case parse (space *> pExp <* eof) fname s of
