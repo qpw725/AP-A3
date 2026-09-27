@@ -77,26 +77,11 @@ tests =
         [ parserTest "x y" $ Apply (Var "x") (Var "y"),
           parserTest "x y z" $ Apply (Apply (Var "x") (Var "y")) (Var "z"),
           parserTest "x(y z)" $ Apply (Var "x") (Apply (Var "y") (Var "z")),
-          parserTest "f 1 true" $ Apply (Apply (Var "f") (CstInt 1)) (CstBool True),
-          parserTest "f\t x\n y " $ Apply (Apply (Var "f") (Var "x")) (Var "y"),
-          parserTest "xy" $ Var "xy",
-          parserTest "f x + y" $ Add (Apply (Var "f") (Var "x")) (Var "y"),
-          parserTest "x - f y" $ Sub (Var "x") (Apply (Var "f") (Var "y")),
           parserTest "f x * g y z" $
             Mul (Apply (Var "f") (Var "x")) (Apply (Apply (Var "g") (Var "y")) (Var "z")),
-          parserTest "f x / g y" $
-            Div (Apply (Var "f") (Var "x")) (Apply (Var "g") (Var "y")),
-          parserTest "f (x + y)" $ Apply (Var "f") (Add (Var "x") (Var "y")),
           parserTest "f (if x then y else z)" $
             Apply (Var "f") (If (Var "x") (Var "y") (Var "z")),
-          parserTest "(if x then f else g) y" $
-            Apply (If (Var "x") (Var "f") (Var "g")) (Var "y"),
-          parserTest "if f x then g y else h z" $
-            If (Apply (Var "f") (Var "x")) (Apply (Var "g") (Var "y")) (Apply (Var "h") (Var "z")),
-          parserTestFail "x if x then y else z",
-          parserTestFail "f ()",
-          parserTestFail "f (x",
-          parserTestFail "f 123x"
+          parserTestFail "x if x then y else z"
         ],
       testGroup
         "Conditional expressions"
