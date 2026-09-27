@@ -235,21 +235,55 @@ tests =
         [ parserTest "2 " $ CstInt 2,
           parserTest " 2" $ CstInt 2
         ],
-            testGroup
+      testGroup
         "Print statement"
         [ parserTest "print \"Hello world\" x" $ Print "Hello world" (Var "x"),
           parserTest "print \" Hello world\" xs" $ Print " Hello world" (Var "xs"),
-          parserTest "print \"Hello world \" xs" $ Print "Hello world " (Var "xs")
+          parserTest "print \"Hello world \" xs" $ Print "Hello world " (Var "xs"),
+
+          parserTest "print \"val: \" 42" $ Print "val: " (CstInt 42),
+
+          parserTest "print \"\" x" $ Print "" (Var "x"),
+
+          parserTest "print \"sum\" (a + b)" $ Print "sum" (Add (Var "a") (Var "b")),
+
+          parserTest "printx" $ Var "printx",
+
+          parserTestFail "print \"missing expr\"",
+          parserTestFail "print 42 x"
         ],
+
       testGroup
         "KvPut"
         [ parserTest "put x y" $ KvPut (Var "x") (Var "y"),
-          parserTest "put a b" $ KvPut (Var "a") (Var "b")
+          parserTest "put a b" $ KvPut (Var "a") (Var "b"),
+
+          parserTest "put 1 2" $ KvPut (CstInt 1) (CstInt 2),
+
+          parserTest "put key 100" $ KvPut (Var "key") (CstInt 100),
+
+          parserTest "put x (a + b)" $ KvPut (Var "x") (Add (Var "a") (Var "b")),
+
+          parserTest "putx" $ Var "putx",
+
+          parserTestFail "put x",
+          parserTestFail "put"
         ],
+
       testGroup
         "KvGet"
         [ parserTest "get x" $ KvGet (Var "x"),
           parserTest "get a + b" $ Add (KvGet (Var "a")) (Var "b"),
-          parserTest "getx" $ Var "getx"
+          parserTest "getx" $ Var "getx",
+
+          parserTest "get 42" $ KvGet (CstInt 42),
+
+          parserTest "get (a + b)" $ KvGet (Add (Var "a") (Var "b")),
+
+          parserTest "1 + get x" $ Add (CstInt 1) (KvGet (Var "x")),
+
+          parserTest "get (get x)" $ KvGet (KvGet (Var "x")),
+
+          parserTestFail "get"
         ]
     ]
