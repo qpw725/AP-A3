@@ -30,7 +30,14 @@ keywords =
     "then",
     "else",
     "true",
-    "false"
+    "false",
+    "try",
+    "catch",
+    "let",
+    "in",
+    "loop",
+    "for",
+    "do"
   ]
 
 lVName :: Parser VName
@@ -68,10 +75,54 @@ pAtom =
       lString "(" *> pExp <* lString ")"
     ]
 
+pLambda :: Parser Exp
+pLambda = do
+  lString "\\"
+  v <- lVName
+  lString "->"
+  e <- pExp
+  pure $ Lambda v e
+
+pTryCatch :: Parser Exp
+pTryCatch = do
+  lKeyword "try"
+  e1 <- pExp
+  lKeyword "catch"
+  e2 <- pExp
+  pure $ TryCatch e1 e2
+
+pLet :: Parser Exp
+pLet = do
+  lKeyword "let"
+  v <- lVName
+  lString "="
+  e1 <- pExp
+  lKeyword "in"
+  e2 <- pExp
+  pure $ Let v e1 e2
+
+pLoop :: Parser Exp
+pLoop = do
+  lKeyword "loop"
+  v1 <- lVName
+  lString "="
+  e1 <- pExp
+  lKeyword "for"
+  v2 <- lVName
+  lString "<"
+  e2 <- pExp
+  lKeyword "do"
+  e3 <- pExp
+  pure $ ForLoop (v1, e1) (v2, e2) e3
+
 pLExp :: Parser Exp
 pLExp =
   choice
-    [ If
+    [ pLambda,
+      pTryCatch,
+      pLet,
+      pLoop,
+      If
         <$> (lKeyword "if" *> pExp)
         <*> (lKeyword "then" *> pExp)
         <*> (lKeyword "else" *> pExp),
