@@ -37,7 +37,10 @@ keywords =
     "in",
     "loop",
     "for",
-    "do"
+    "do",
+    "print",
+    "put",
+    "get"
   ]
 
 lVName :: Parser VName
@@ -58,6 +61,13 @@ lString s = lexeme $ void $ chunk s
 
 lKeyword :: String -> Parser ()
 lKeyword s = lexeme $ void $ try $ chunk s <* notFollowedBy (satisfy isAlphaNum)
+
+pString :: Parser String
+pString = lexeme $ try $ do
+  _ <- satisfy (=='"')
+  cs <- many $ satisfy (/= '"')
+  _ <- satisfy (=='"')
+  pure cs
 
 pBool :: Parser Bool
 pBool =
