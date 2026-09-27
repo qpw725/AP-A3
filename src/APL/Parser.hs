@@ -137,6 +137,14 @@ pLExp =
         <$> (lKeyword "if" *> pExp)
         <*> (lKeyword "then" *> pExp)
         <*> (lKeyword "else" *> pExp),
+      Print 
+        <$> (lKeyword "print" *> pString)
+        <*> (pAtom),
+      KvPut
+        <$> (lKeyword "put" *> pAtom)
+        <*> pAtom,
+      KvGet
+        <$> (lKeyword "get" *> pAtom),
       pFExp
     ]
 
