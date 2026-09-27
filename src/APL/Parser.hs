@@ -68,6 +68,17 @@ pAtom =
       lString "(" *> pExp <* lString ")"
     ]
 
+pFExp :: Parser Exp
+pFExp = pAtom >>= chain
+  where
+    chain x =
+      choice
+        [ do
+            y <- pAtom
+            chain $ Apply x y,
+          pure x
+        ]
+
 pLExp :: Parser Exp
 pLExp =
   choice
@@ -75,7 +86,7 @@ pLExp =
         <$> (lKeyword "if" *> pExp)
         <*> (lKeyword "then" *> pExp)
         <*> (lKeyword "else" *> pExp),
-      pAtom
+      pFExp
     ]
 
 pExp1 :: Parser Exp
